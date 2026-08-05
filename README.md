@@ -152,7 +152,6 @@ streamlit run text_to_sql.py     # chat with your warehouse
   - Orchestrating a multi-step pipeline with Airflow, fully containerized
   - Applying LLMs to real data problems: sentiment enrichment, RAG, and natural-language-to-SQL
 
----
 
 ## 👤 Author
 
