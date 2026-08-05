@@ -19,6 +19,7 @@ An end-to-end Data Engineering + AI project that simulates Zomato order/review d
 - **Text-to-SQL Assistant:** A second Streamlit app that lets you "chat with your warehouse" in plain English, translated into SQL and run against Snowflake.
 - **Infrastructure as Code:** IAM policies and S3 ↔ Snowflake trust relationships version-controlled for repeatable setup.
 
+---
 
 ## 🛠️ Tech Stack
 
