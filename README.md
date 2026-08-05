@@ -19,35 +19,6 @@ An end-to-end Data Engineering + AI project that simulates Zomato order/review d
 - **Text-to-SQL Assistant:** A second Streamlit app that lets you "chat with your warehouse" in plain English, translated into SQL and run against Snowflake.
 - **Infrastructure as Code:** IAM policies and S3 ↔ Snowflake trust relationships version-controlled for repeatable setup.
 
----
-
-## 🏗️ Architecture
-
-    [ Mock Zomato Order/Review Data ]
-                  │
-                  ▼
-          [ AWS S3 - Raw CSVs ]
-                  │  (Storage Integration, keyless)
-                  ▼
-       [ Snowflake - RAW / Bronze ]
-                  │
-                  ▼ (dbt staging models)
-       [ Snowflake - Silver ]
-                  │
-                  ▼ (dbt marts: dims + facts)
-       [ Snowflake - Gold / Marts ]
-                  │
-                  ├──► [ OpenAI LLM Enrichment → ZOMATO.AI.REVIEW_ENRICHED ]
-                  │
-                  ├──► [ Streamlit RAG Chat — "chat with your reviews" ]
-                  │
-                  └──► [ Streamlit Text-to-SQL — "chat with your warehouse" ]
-
-Entire flow orchestrated end-to-end by an Airflow DAG (4 tasks), running on Docker.
-
-*(See `docs/architecture.png` for the visual diagram.)*
-
----
 
 ## 🛠️ Tech Stack
 
