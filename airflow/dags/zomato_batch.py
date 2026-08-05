@@ -1,3 +1,7 @@
+# Project: Zomato Real-time AI Data Pipeline
+# Author: Azeem (https://github.com/Azeem8541)
+# Description: Ingests streaming data, transforms via PySpark, and loads to AWS S3.
+
 from datetime import datetime
 from airflow import DAG
 from airflow.providers.common.sql.operators.sql import SQLExecuteQueryOperator
