@@ -1,69 +1,140 @@
-# 🚴 Zomato Real-time AI Data Engineering Pipeline
+🍽️ Zomato Real-Time AI Data Pipeline
 
-Developed a scalable, end-to-end data pipeline designed to ingest real-time Zomato order and review streams, process them using Medallion Lakehouse Architecture (Bronze -> Silver -> Gold), and run automated Sentiment Analysis using LLMs (OpenAI API).
+An end-to-end Data Engineering + AI project that simulates Zomato order/review data, loads it into Snowflake, transforms it through a Medallion Architecture (Bronze → Silver → Gold) using dbt, orchestrates everything with Apache Airflow, and layers LLM-powered AI features (review sentiment enrichment, RAG chat, and text-to-SQL) on top — all containerized with Docker.
 
----
 ![Data Engineering Pipeline Architecture](docs/architecture.png)
 
-## 📌 Key Highlights & Features
-- **Real-time Event Ingestion:** Handled high-throughput streaming order events via **Apache Kafka**.
-- **Medallion Lakehouse Architecture:** 
-  - **Bronze:** Raw JSON landing zone on **AWS S3**.
-  - **Silver:** Cleaned, deduplicated, and schema-validated data using **PySpark**.
-  - **Gold:** Aggregated business metrics and sentiment tags saved in **Delta / Parquet** format.
-- **AI Sentiment Engine:** Integrated OpenAI LLM to automatically classify review text into *Positive*, *Negative*, or *Neutral* along with topic extraction.
-- **Automated Workflow:** Pipeline execution scheduled and monitored using **Apache Airflow**.
+📌 Key Highlights & Features
+Orchestration: Fully automated pipeline built and scheduled with Apache Airflow 3 (running on Docker with Postgres metadata DB + API server + scheduler).
+Cloud Data Warehouse: Snowflake as the central warehouse — RAW (Bronze), staging (Silver), and marts (Gold) schemas.
+Keyless Cloud Storage Integration: Data lands in AWS S3, connected to Snowflake via a secure storage integration (no hardcoded AWS keys) using IAM role trust policies.
+Transformation Layer (dbt): 7 staging models (Silver) with source freshness/tests, plus dimension tables, incremental fact tables, and business marts (Gold) — using a custom schema-naming macro.
+AI Enrichment: An LLM (OpenAI API) enriches customer reviews with sentiment and topic tags, written back into Snowflake (ZOMATO.AI.REVIEW_ENRICHED).
+RAG Chatbot: A Streamlit app that lets you "chat with your reviews" using Retrieval-Augmented Generation.
+Text-to-SQL Assistant: A second Streamlit app that lets you "chat with your warehouse" in plain English, which is translated into SQL and run against Snowflake.
+Infrastructure as Code: IAM policies and S3 ↔ Snowflake trust relationships version-controlled for repeatable setup.
+🏗️ Architecture
+[ Mock Zomato Order/Review Data ]
+              │
+              ▼
+      [ AWS S3 - Raw CSVs ]
+              │  (Storage Integration, keyless)
+              ▼
+   [ Snowflake - RAW / Bronze ]
+              │
+              ▼ (dbt staging models)
+   [ Snowflake - Silver ]
+              │
+              ▼ (dbt marts: dims + facts)
+   [ Snowflake - Gold / Marts ]
+              │
+              ├──► [ OpenAI LLM Enrichment → ZOMATO.AI.REVIEW_ENRICHED ]
+              │
+              ├──► [ Streamlit RAG Chat — "chat with your reviews" ]
+              │
+              └──► [ Streamlit Text-to-SQL — "chat with your warehouse" ]
 
----
+Entire flow orchestrated end-to-end by an Airflow DAG (4 tasks),
+running on Docker.
 
-## 🏗️ Data Pipeline Architecture
+(See docs/architecture.png for the visual diagram.)
 
-[ Mock Event Generator ]
+🛠️ Tech Stack
+Layer	Tools & Technologies
+Orchestration	Apache Airflow 3 (Docker, Postgres backend)
+Storage	AWS S3, AWS IAM (storage integration)
+Data Warehouse	Snowflake
+Transformation	dbt (staging + marts, tests, macros)
+AI / LLM	OpenAI API (sentiment enrichment, RAG, text-to-SQL)
+AI Apps / UI	Streamlit
+Containerization	Docker, Docker Compose
+Language	Python, SQL
+📁 Repository Structure
+zomato-realtime-ai-data-pipeline/
 │
-▼
-[ Apache Kafka ]  ──(Streaming)──►  [ AWS S3 - Bronze Zone ]
+├── airflow/                        # Airflow 3 on Docker
+│   ├── Dockerfile                  #   Snowflake + OpenAI providers, dbt in its own venv
+│   ├── docker-compose.yaml         #   postgres + api-server + scheduler; creds via env vars
+│   ├── example.env                 #   template for SNOWFLAKE_* / OPENAI_API_KEY
+│   └── dags/
+│       └── zomato_batch.py         #   the pipeline DAG (4 tasks)
 │
-▼
-[ PySpark / AWS Glue ]
+├── zomato/                         # dbt project
+│   ├── models/staging/             #   7 staging views (Silver) + sources + tests
+│   ├── models/marts/               #   dims, incremental facts, business marts (Gold)
+│   └── macros/                     #   custom schema-name macro
 │
-(Clean & Transform)
+├── ai/                             # AI layer
+│   ├── enrich_reviews.py           #   LLM enrichment → ZOMATO.AI.REVIEW_ENRICHED
+│   ├── rag_chat.py                 #   RAG — "chat with your reviews" (Streamlit)
+│   ├── text_to_sql.py              #   text-to-SQL — "chat with your warehouse" (Streamlit)
+│   └── example.env                 #   template for the AI credentials
 │
-▼
-[ AWS S3 - Silver Zone ]
+├── snowflake/                      # Snowflake setup SQL (run in Snowsight, in order)
+│   ├── 01_setup.sql                #   warehouse ZOMATO_WH, database ZOMATO, schemas, role
+│   ├── 02_storage_integration.sql  #   keyless S3 link (pairs with aws/iam/)
+│   ├── 03_stage_and_formats.sql    #   external stage + CSV file format
+│   ├── 04_raw_tables.sql           #   RAW (Bronze) table DDL, column order matches the CSVs
+│   └── 05_copy_into.sql            #   COPY INTO RAW from the stage
 │
-▼
-[ OpenAI LLM Sentiment ]
+├── aws/
+│   └── iam/                        # IAM policy + role trust policies for the S3 ↔ Snowflake handshake
 │
-▼
-[ AWS S3 - Gold Zone ]
+├── docs/
+│   └── architecture.png            # architecture diagram
 │
-▼
-[ AWS Athena / SQL BI ]
+├── .gitignore
+└── README.md
+⚙️ Setup & Installation
+1. Prerequisites
+Docker & Docker Compose installed
+A Snowflake account (free trial works)
+An AWS account with S3 access
+An OpenAI API key
+2. Clone the repo
+bash
+git clone https://github.com/Azeem8541/zomato-realtime-ai-data-pipeline.git
+cd zomato-realtime-ai-data-pipeline
+3. Set up Snowflake
 
+Run the SQL scripts in snowflake/ in order via Snowsight:
 
----
+01_setup.sql → 02_storage_integration.sql → 03_stage_and_formats.sql → 04_raw_tables.sql → 05_copy_into.sql
+4. Configure AWS IAM
 
-## 🛠️ Tech Stack Used
+Apply the IAM policy and trust relationship from aws/iam/ so Snowflake can securely read from your S3 bucket (keyless storage integration).
 
-| Category | Tools & Technologies |
-| :--- | :--- |
-| **Data Ingestion** | Apache Kafka, Python Scripts |
-| **Storage / Data Lake** | AWS S3, Delta Lake |
-| **Processing Engine** | PySpark, AWS Glue |
-| **AI / LLM** | OpenAI API (GPT-3.5/4) |
-| **Query Engine** | AWS Athena, SQL |
-| **Orchestration** | Apache Airflow |
+5. Configure environment variables
 
----
+Copy the example env files and fill in your credentials:
 
-## 💡 Key Engineering Challenges I Solved
+bash
+cp airflow/example.env airflow/.env
+cp ai/example.env ai/.env
 
-1. **Cost Optimization in Athena Queries:** Direct JSON querying on S3 was expensive and slow. I transformed raw streams into partitioned **Parquet** format in the Silver layer, reducing query latency by **~65%** and cutting scan costs.
-2. **Handling Unstructured Review Data:** Standard SQL couldn't capture customer sentiment nuance. I built an asynchronous Python wrapper around the **OpenAI API** to enrich Gold layer reviews with structured sentiment metrics.
+Set your SNOWFLAKE_* and OPENAI_API_KEY values in both files.
 
----
+6. Start Airflow
+bash
+cd airflow
+docker compose up -d
 
-## 👤 Author
-**Azeem**  
-- **GitHub:** [Azeem8541](https://github.com/Azeem8541)  
-- **Role:** Data Engineer
+Access the Airflow UI at http://localhost:8080 and trigger the zomato_batch DAG.
+
+7. Run the AI apps
+bash
+cd ai
+streamlit run rag_chat.py        # chat with your reviews
+streamlit run text_to_sql.py     # chat with your warehouse
+🧠 What This Project Demonstrates
+Designing and running a Medallion Architecture (Bronze/Silver/Gold) on a real cloud warehouse
+Setting up secure, keyless cloud storage integration between AWS and Snowflake using IAM
+Writing production-style dbt models with tests, macros, and incremental logic
+Orchestrating a multi-step pipeline with Airflow, fully containerized
+Applying LLMs to real data problems: sentiment enrichment, RAG, and natural-language-to-SQL
+👤 Author
+
+Azeem
+
+GitHub: @Azeem8541
+Role: Data Engineer
