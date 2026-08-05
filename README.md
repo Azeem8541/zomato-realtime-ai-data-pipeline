@@ -146,14 +146,11 @@ streamlit run rag_chat.py        # chat with your reviews
 streamlit run text_to_sql.py     # chat with your warehouse
 ```
 ### 8. What This Project Demonstrates
-```
-- Designing and running a Medallion Architecture (Bronze/Silver/Gold) on a real cloud warehouse
-- Setting up secure, keyless cloud storage integration between AWS and Snowflake using IAM
-- Writing production-style dbt models with tests, macros, and incremental logic
-- Orchestrating a multi-step pipeline with Airflow, fully containerized
-- Applying LLMs to real data problems: sentiment enrichment, RAG, and natural-language-to-SQL
-
-```
+  - Designing and running a Medallion Architecture (Bronze/Silver/Gold) on a real cloud warehouse
+  - Setting up secure, keyless cloud storage integration between AWS and Snowflake using IAM
+  - Writing production-style dbt models with tests, macros, and incremental logic
+  - Orchestrating a multi-step pipeline with Airflow, fully containerized
+  - Applying LLMs to real data problems: sentiment enrichment, RAG, and natural-language-to-SQL
 
 ---
 
