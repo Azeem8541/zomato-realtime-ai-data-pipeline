@@ -3,6 +3,7 @@
 Developed a scalable, end-to-end data pipeline designed to ingest real-time Zomato order and review streams, process them using Medallion Lakehouse Architecture (Bronze -> Silver -> Gold), and run automated Sentiment Analysis using LLMs (OpenAI API).
 
 ---
+![Data Engineering Pipeline Architecture](images/architecture.png)
 
 ## 📌 Key Highlights & Features
 - **Real-time Event Ingestion:** Handled high-throughput streaming order events via **Apache Kafka**.
